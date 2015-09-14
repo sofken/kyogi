@@ -1,4 +1,5 @@
 import math
+from copy import deepcopy
 
 def Match_rate(list1,list2):
  #import math
@@ -66,23 +67,26 @@ def getdata():
 			tmpdata = []
 		elif(len(line)!=4):
 			line = line.rstrip('\r\n')
-			tmpdata.append(line)
+			tmpdata.append(list(line))
 	return data	
 
-#[ABC,DEF,GHI] -> ABCDEFGHI
+#ABC -> A,B,C
 def twotoone(two):
 	onedata = ""
+	onelist = []
 	for tmp in two:
-		onedata += tmp
+		onedata += (tmp + ",")
+	onedata = onedata[:-1]
+	onelist = [onedata]
 	return onedata
 
 #two data -> one data
 def getone(two):
-	tmpdata = ""
-	onedata = []
-	for tmp in two:
-		onedata.append(twotoone(tmp))
-	return onedata
+	twolen = len(two)
+	cptwo = deepcopy(two)
+	for i in range(twolen-1):
+		cptwo[0].extend(cptwo[i+1])
+	return cptwo[0]
 
 def Conversion(list1):
  i=0
@@ -102,14 +106,36 @@ def Count_0(list1):
    Count+=1
  return Count
 
+#put stone
+#def putstone(stage,stone,coor,dire,act):
+	#coor(coordinate)...(X,Y)
+	#dire(direction)...1(up) 2(bottom) 3(left) 4(right)
+
+	#operate against stone
+
+#ooll vector
+def roll(stone,times):
+	rollstone = deepcopy(stone)
+	for i in range(8):
+		for j in range(8):
+			nexti = j
+			nextj = 7-i
+			rollstone[nexti][nextj] = stone[i][j]
+	return rollstone
 
 data = getdata() #stage & stone two data
-onedata = getone(data) #stage & stone one data
-stage = onedata[0]
+onedata = []
+for i in range(len(data)):
+	onedata.append(getone(data[i])) #stage & stone one data
+twostage = data[0]
+del data[0]
+onestage = onedata[0]
 del onedata[0]
+print(data[0])
+print(roll(data[0],0))
 IF_stage = [[1,0,0,0]]
 IF_stone = onedata #templary IF = getdata
 Main_code = [[0,0,1],[1,0,2]]
 Trimming_stage = [1,0,0,0]
 stone_now=onedata[1]
-print test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now)
+#print test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now)
