@@ -56,7 +56,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
 
 #get stage & stone data 0->stage 1~->stone
 def getdata():
-	f = open('sample.txt','r')
+	f = open('sample2.txt','r')
 	tmpdata = []
 	data = []
 	i = 0
@@ -107,35 +107,93 @@ def Count_0(list1):
  return Count
 
 #put stone
-#def putstone(stage,stone,coor,dire,act):
+def putstone(stage,stone,coor,dire,act):
 	#coor(coordinate)...(X,Y)
 	#dire(direction)...1(up) 2(bottom) 3(left) 4(right)
 
 	#operate against stone
+	cpstone = roll(stone,act[1])
+	if(act[2] == 1):
+		cpstone = lrchange(cpstone)
+	#put
+	if(dire == 1):
+		zerox = coor[0]-act[0][0]
+		zeroy = coor[1]-act[0][1]-1
+	elif(dire == 2):	
+		zerox = coor[0]-act[0][0]
+		zeroy = coor[1]-act[0][1]+1
+	elif(dire == 3):
+		zerox = coor[0]-act[0][0]-1
+		zeroy = coor[1]-act[0][1]
+	elif(dire == 4):
+		zerox = coor[0]-act[0][0]+1
+		zeroy = coor[1]-act[0][1]
 
-#ooll vector
-def roll(stone,times):
-	rollstone = deepcopy(stone)
+	passes = 1
 	for i in range(8):
 		for j in range(8):
-			nexti = j
-			nextj = 7-i
-			rollstone[nexti][nextj] = stone[i][j]
+			if(stage[i+zeroy][j+zerox]=='0' and cpstone[i][j]=='1'):
+				stage[i+zeroy][j+zerox] = '3'
+			elif((stage[i+zeroy][j+zerox]=='1' or stage[i+zeroy][j+zerox]=='2') and cpstone[i][j]=='1'):
+				passes = 0
+				break
+
+	
+	#3->2 or 3->1
+	if(passes == 1):
+		change = '2'
+	else:
+		change = '0'
+	for k in range(8):
+		for l in range(8):
+			if(stage[k+zeroy][l+zerox]=='3'):
+				stage[k+zeroy][l+zerox] = change
+
+#roll vector
+def roll(stone,times):
+	rollstone = deepcopy(stone)
+	for k in range(times):
+		for i in range(8):
+			for j in range(8):
+				nexti = j
+				nextj = 7-i
+				rollstone[nexti][nextj] = stone[i][j]
 	return rollstone
+
+#change left and right
+def lrchange(stone):
+	changestone = deepcopy(stone)
+	for i in range(8):
+		for j in range(8):
+			nextj = 7 - j
+			changestone[i][nextj] = stone[i][j]
+	return changestone
+
+#add many 1
+def addone(stage):
+	for i in range(32):
+		for j in range(10):
+			stage[i].append('1')
+	for k in range(10):
+		stage.append([])
+		for l in range(42):
+			stage[k+32].append('1')
 
 data = getdata() #stage & stone two data
 onedata = []
 for i in range(len(data)):
 	onedata.append(getone(data[i])) #stage & stone one data
 twostage = data[0]
+addone(twostage)
 del data[0]
-onestage = onedata[0]
+onestage = getone(twostage)
 del onedata[0]
-print(data[0])
-print(roll(data[0],0))
 IF_stage = [[1,0,0,0]]
 IF_stone = onedata #templary IF = getdata
+act = [[[1,3],1,1]]
 Main_code = [[0,0,1],[1,0,2]]
 Trimming_stage = [1,0,0,0]
 stone_now=onedata[1]
 #print test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now)
+putstone(twostage,data[1],[6,5],1,act[0])
+print(twostage)
