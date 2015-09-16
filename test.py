@@ -42,17 +42,19 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
   i+=1
  i=0
  while i<IF_stage_number:
-  now_Match_rate=Match_rate(Trimming_stage,IF_stage[i])
+  now_Match_rate=Match_rate(getone(Trimming_stage),getone(IF_stage[i]))
   if now_Match_rate>Match_rate_stage_max:
    Match_rate_stage_number=i
    Match_rate_stage_max=now_Match_rate
   i+=1
  i=0
+ Match_rate_stone_ma = round(Match_rate_stone_max,1)
+ Match_rate_stone_ma = round(Match_rate_stage_max,1)
  while i<Main_code_number:
   if Main_code[i][0]==Match_rate_stone_number and Main_code[i][1]==Match_rate_stage_number:
    return Main_code[i][2]
   i+=1
- return -1
+ return 0
 
 #get stage & stone data 0->stage 1~->stone
 def getdata():
@@ -190,11 +192,11 @@ def findone(stone,x,y):
 			for k in range(i):
 				if(j+y<8 and k+x<8 and stone[j+y][k+x]=='1'):
 					one = [k+x,j+y]
-					print(one)
+					#print(one)
 					return one
 				elif(y-j>-1 and x-k>-1 and stone[y-j][x-k] == '1'):
 					one = [x-k,y-j]
-					print(one)
+					#print(one)
 					return one
 
 def Find_side(STAGE):
@@ -247,6 +249,7 @@ def trimming(SIDE,STAGE):
 
  return t_stage
 
+#stone & stage reading
 data = getdata() #stage & stone two data
 onedata = []
 for i in range(len(data)):
@@ -256,15 +259,19 @@ addone(twostage)
 del data[0]
 onestage = getone(twostage)
 del onedata[0]
-IF_stage = [[1,0,0,0]]
+
+#tromming datas
+side=Find_side(twostage)
+tristage = trimming(side,twostage)
+
+#codes
+IF_stage = tristage
 IF_stone = onedata #templary IF = getdata
-act = [[[6,0],0,1]]
-Main_code = [[0,0,1],[1,0,2]]
-Trimming_stage = [1,0,0,0]
+act = [[[1,3],0,0],[[4,6],2,0]]
+Main_code = [[1,0,0],[1,1,1]]
 stone_now=onedata[1]
 
-#print test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now)
-#putstone(twostage,data[0],[6,5],4,act[0])
-#print(twostage)
-side=Find_side(twostage)
-print(trimming(side,twostage))
+#put stone & output
+action = test(IF_stage,IF_stone,Main_code,tristage[0],stone_now)
+putstone(twostage,data[0],[side[0][0]+4,side[0][1]+4],4,act[action])
+print(twostage)
