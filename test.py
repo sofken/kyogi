@@ -115,19 +115,22 @@ def putstone(stage,stone,coor,dire,act):
 	cpstone = roll(stone,act[1])
 	if(act[2] == 1):
 		cpstone = lrchange(cpstone)
+
+	cpact = findone(cpstone,act[0][0],act[0][1])
+
 	#put
 	if(dire == 1):
-		zerox = coor[0]-act[0][0]
-		zeroy = coor[1]-act[0][1]-1
+		zerox = coor[0]-cpact[0]
+		zeroy = coor[1]-cpact[1]-1
 	elif(dire == 2):	
-		zerox = coor[0]-act[0][0]
-		zeroy = coor[1]-act[0][1]+1
+		zerox = coor[0]-cpact[0]
+		zeroy = coor[1]-cpact[1]+1
 	elif(dire == 3):
-		zerox = coor[0]-act[0][0]-1
-		zeroy = coor[1]-act[0][1]
+		zerox = coor[0]-cpact[0]-1
+		zeroy = coor[1]-cpact[1]
 	elif(dire == 4):
-		zerox = coor[0]-act[0][0]+1
-		zeroy = coor[1]-act[0][1]
+		zerox = coor[0]-cpact[0]+1
+		zeroy = coor[1]-cpact[1]
 
 	passes = 1
 	for i in range(8):
@@ -135,7 +138,6 @@ def putstone(stage,stone,coor,dire,act):
 			if(stage[i+zeroy][j+zerox]=='0' and cpstone[i][j]=='1'):
 				stage[i+zeroy][j+zerox] = '3'
 			elif((stage[i+zeroy][j+zerox]=='1' or stage[i+zeroy][j+zerox]=='2') and cpstone[i][j]=='1'):
-				passes = 0
 				break
 
 	
@@ -152,13 +154,15 @@ def putstone(stage,stone,coor,dire,act):
 #roll vector
 def roll(stone,times):
 	rollstone = deepcopy(stone)
+	copystone = deepcopy(stone)
 	for k in range(times):
 		for i in range(8):
 			for j in range(8):
 				nexti = j
 				nextj = 7-i
-				rollstone[nexti][nextj] = stone[i][j]
-	return rollstone
+				rollstone[nexti][nextj] = copystone[i][j]
+		copystone = deepcopy(rollstone)
+	return copystone
 
 #change left and right
 def lrchange(stone):
@@ -179,6 +183,20 @@ def addone(stage):
 		for l in range(42):
 			stage[k+32].append('1')
 
+#find 1 in stone
+def findone(stone,x,y):
+	for i in range(8):
+		for j in range(i):
+			for k in range(i):
+				if(j+y<8 and k+x<8 and stone[j+y][k+x]=='1'):
+					one = [k+x,j+y]
+					print(one)
+					return one
+				elif(y-j>-1 and x-k>-1 and stone[y-j][x-k] == '1'):
+					one = [x-k,y-j]
+					print(one)
+					return one
+
 data = getdata() #stage & stone two data
 onedata = []
 for i in range(len(data)):
@@ -190,10 +208,10 @@ onestage = getone(twostage)
 del onedata[0]
 IF_stage = [[1,0,0,0]]
 IF_stone = onedata #templary IF = getdata
-act = [[[1,3],1,1]]
+act = [[[6,0],0,1]]
 Main_code = [[0,0,1],[1,0,2]]
 Trimming_stage = [1,0,0,0]
 stone_now=onedata[1]
 #print test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now)
-putstone(twostage,data[1],[6,5],1,act[0])
+putstone(twostage,data[0],[6,5],4,act[0])
 print(twostage)
