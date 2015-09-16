@@ -197,6 +197,56 @@ def findone(stone,x,y):
 					print(one)
 					return one
 
+def Find_side(STAGE):
+ n=32
+ i=0
+ Side=[]
+ while i<n :
+   j=0
+
+   while j<n :
+     if STAGE[i][j]=='2' :
+        Side.append([j,i])
+     if j<n :
+       j+=1
+       continue
+
+   i+=1
+   continue
+ return Side
+
+def trimming(SIDE,STAGE):
+ a=len(SIDE)
+ k=0
+ t_stage = []
+ while k<a :
+   SIDE[k][0]=SIDE[k][0]-4
+   SIDE[k][1]=SIDE[k][1]-4
+   B=SIDE[k]
+   
+   t_stage.append([])
+   i=SIDE[k][1]
+
+   i1=SIDE[k][1]
+   j1=SIDE[k][0]
+   c = 0
+   while i<i1+9 :
+     t_stage[k].append([])
+     j=SIDE[k][0]
+
+     while j<j1+9 :
+       t_stage[k][c].append(STAGE[i][j])
+       j+=1
+       continue
+
+     i+=1
+     c+=1
+     continue
+
+   k+=1
+
+ return t_stage
+
 data = getdata() #stage & stone two data
 onedata = []
 for i in range(len(data)):
@@ -212,6 +262,9 @@ act = [[[6,0],0,1]]
 Main_code = [[0,0,1],[1,0,2]]
 Trimming_stage = [1,0,0,0]
 stone_now=onedata[1]
+
 #print test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now)
-putstone(twostage,data[0],[6,5],4,act[0])
-print(twostage)
+#putstone(twostage,data[0],[6,5],4,act[0])
+#print(twostage)
+side=Find_side(twostage)
+print(trimming(side,twostage))
