@@ -9,7 +9,7 @@ def First_search(stage_list):
  Standard_Barrier_Rate=25#後で変更(障害物が多いか少ないかの基準(1〜100%))
  stage_len=len(stage_list)
  stage_size=math.sqrt(stage_len)
- Barrier_Rate=(stage_len-Number_0)/stage_size*100
+ Barrier_Rate=(stage_len-Number_0)/float(stage_len)*100
  flag=-1#0:Center 1:Corner
  most_0=Dist(stage_list)
  if Barrier_Rate==0:#障害物ゼロのときは左上角
@@ -45,9 +45,63 @@ def First_search(stage_list):
    i+=1
  return Trimming_yx
   
- 
- 
- 
+def First_search_01(stage_list):
+ count0=Count_0(stage_list)
+ stage_len=len(stage_list)
+ search_01=-1
+ Opposite=-1
+ stage_size=int(math.sqrt(stage_len))
+ cut_stage=CUT(stage_list,stage_size)
+ Trimming_stage=[]
+ if count0>(stage_len/2):
+  search_01=0
+  Opposite=1
+ else:
+  search_01=1
+  Opposite=0
+ i=0
+ j=0
+ k=0
+ no=0
+ while i<stage_size:
+  j=0
+  while j<stage_size:
+   if cut_stage[i][j]==search_01 and((i<>0 and cut_stage[i-1][j]==Opposite) or (j<>0 and cut_stage[i][j-1]==Opposite) or (i<>(stage_size-1) and cut_stage[i+1][j]==Opposite) or (j<>(stage_size-1) and cut_stage[i][j+1]==Opposite)):
+    if search_01==0:
+     Trimming_stage.append([i,j])
+    if search_01==1:
+     if i<>0 and cut_stage[i-1][j]==Opposite:
+      for k in Trimming:
+       if k==[i-1,j]:
+        no=1
+      if no==0:
+       Trimming_stage.append(i-1,j)
+      no=0
+     if j<>0 and cut_stage[i][j-1]==Opposite:
+      for k in Trimming:
+       if k==[i,j-1]:
+        no=1
+      if no==0:
+       Trimming_stage.append(i,j-1)
+      no=0
+     if i<>(stage_size-1) and cut_stage[i+1][j]==Opposite:
+      for k in Trimming:
+       if k==[i+1,j]:
+        no=1
+      if no==0:
+       Trimming_stage.append(i+1,j)
+      no=0
+     if j<>(stage_size-1) and cut_stage[i][j+1]==Opposite:
+      for k in Trimming:
+       if k==[i,j+1]:
+        no=1
+      if no==0:
+       Trimming_stage.append(i,j+1)
+      no=0
+   j+=1
+  i+=1
+ return Trimming_stage
+  
 def Dist(list1):
  #import math
  stage_size=int(math.sqrt(len(list1)))
@@ -132,6 +186,7 @@ def Count_0(list1):
    Count+=1
  return Count
  
-FilePass='/home/el1414/Desktop/Documents/quest1.txt'
+FilePass='/home/el1414/Desktop/Documents/quest2.txt'
 stage=FileRead_stage(FilePass)
-print First_search(stage)
+#print First_search(stage)
+print First_search_01(stage)
