@@ -1,5 +1,6 @@
 import math
 from copy import deepcopy
+import random
 
 def Match_rate(list1,list2):
  #import math
@@ -54,7 +55,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
   if Main_code[i][0]==Match_rate_stone_number and Main_code[i][1]==Match_rate_stage_number:
    return Main_code[i][2]
   i+=1
- return 0
+ return -1
 
 #get stage & stone data 0->stage 1~->stone
 def getdata():
@@ -71,16 +72,6 @@ def getdata():
 			line = line.rstrip('\r\n')
 			tmpdata.append(list(line))
 	return data	
-
-#ABC -> A,B,C
-def twotoone(two):
-	onedata = ""
-	onelist = []
-	for tmp in two:
-		onedata += (tmp + ",")
-	onedata = onedata[:-1]
-	onelist = [onedata]
-	return onedata
 
 #two data -> one data
 def getone(two):
@@ -114,44 +105,47 @@ def putstone(stage,stone,coor,dire,act):
 	#dire(direction)...1(up) 2(bottom) 3(left) 4(right)
 
 	#operate against stone
-	cpstone = roll(stone,act[1])
-	if(act[2] == 1):
-		cpstone = lrchange(cpstone)
-
-	cpact = findone(cpstone,act[0][0],act[0][1])
-
-	#put
-	if(dire == 1):
-		zerox = coor[0]-cpact[0]
-		zeroy = coor[1]-cpact[1]-1
-	elif(dire == 2):	
-		zerox = coor[0]-cpact[0]
-		zeroy = coor[1]-cpact[1]+1
-	elif(dire == 3):
-		zerox = coor[0]-cpact[0]-1
-		zeroy = coor[1]-cpact[1]
-	elif(dire == 4):
-		zerox = coor[0]-cpact[0]+1
-		zeroy = coor[1]-cpact[1]
-
-	passes = 1
-	for i in range(8):
-		for j in range(8):
-			if(stage[i+zeroy][j+zerox]=='0' and cpstone[i][j]=='1'):
-				stage[i+zeroy][j+zerox] = '3'
-			elif((stage[i+zeroy][j+zerox]=='1' or stage[i+zeroy][j+zerox]=='2') and cpstone[i][j]=='1'):
-				break
-
+	if(act[1]!=7):
+		cpstone = roll(stone,act[1])
+		if(act[2] == 1):
+			cpstone = lrchange(cpstone)
+		cpact = findone(cpstone,act[0][0],act[0][1])
 	
-	#3->2 or 3->1
-	if(passes == 1):
-		change = '2'
-	else:
-		change = '0'
-	for k in range(8):
-		for l in range(8):
-			if(stage[k+zeroy][l+zerox]=='3'):
-				stage[k+zeroy][l+zerox] = change
+		#put
+		if(dire == 1):
+			zerox = coor[0]-cpact[0]
+			zeroy = coor[1]-cpact[1]-1
+		elif(dire == 2):	
+			zerox = coor[0]-cpact[0]
+			zeroy = coor[1]-cpact[1]+1
+		elif(dire == 3):
+			zerox = coor[0]-cpact[0]-1
+			zeroy = coor[1]-cpact[1]
+		elif(dire == 4):
+			zerox = coor[0]-cpact[0]+1
+			zeroy = coor[1]-cpact[1]
+	
+		passes = 1
+		for i in range(8):
+			for j in range(8):
+				if(stage[i+zeroy][j+zerox]=='0' and cpstone[i][j]=='1'):
+						stage[i+zeroy][j+zerox] = '3'
+				elif((stage[i+zeroy][j+zerox]=='1' or stage[i+zeroy][j+zerox]=='2') and cpstone[i][j]=='1'):
+					passes = 0
+					break
+	
+		HT=['H','T']
+		#3->2 or 3->1
+		if(passes == 1):
+			change = '2'
+			print(zerox,zeroy,HT[act[2]*90],act[1]*90)
+		else:
+			change = '0'
+			print(' ')
+		for k in range(8):
+			for l in range(8):
+				if(stage[k+zeroy][l+zerox]=='3'):
+					stage[k+zeroy][l+zerox] = change
 
 #roll vector
 def roll(stone,times):
@@ -198,56 +192,71 @@ def findone(stone,x,y):
 					one = [x-k,y-j]
 					#print(one)
 					return one
+				if(y-j>-1 and k+x<8 and stone[y-j][k+x]=='1'):
+					one = [k+x,y-j]
+					#print(one)
+					return one
+				elif(j+y>-1 and x-k>-1 and stone[j+y][x-k] == '1'):
+					one = [x-k,j+y]
+					#print(one)
+					return one
 
 def Find_side(STAGE):
- n=32
- i=0
- Side=[]
- while i<n :
-   j=0
-
-   while j<n :
-     if STAGE[i][j]=='2' :
-        Side.append([j,i])
-     if j<n :
-       j+=1
-       continue
-
-   i+=1
-   continue
- return Side
+	n=32
+	i=0
+	Side=[]
+ 	for j in range(n) :
+		for i in range(n):
+			if STAGE[i][j]=='2' :
+				if(STAGE[i-1][j]=='0'):
+					Side.append([1,[j,i]])
+				if(STAGE[i+1][j]=='0'):
+					Side.append([2,[j,i]])
+				if(STAGE[i][j-1]=='0'):
+					Side.append([3,[j,i]])
+				if(STAGE[i][j+1]=='0'):
+					Side.append([4,[j,i]])
+	return Side
 
 def trimming(SIDE,STAGE):
- a=len(SIDE)
- k=0
- t_stage = []
- while k<a :
-   SIDE[k][0]=SIDE[k][0]-4
-   SIDE[k][1]=SIDE[k][1]-4
-   B=SIDE[k]
+	a=len(SIDE)
+	k=0
+	t_stage = []
+	while k<a :
+		SIDE[k][1][0] = SIDE[k][1][0]-4
+		SIDE[k][1][1] = SIDE[k][1][1]-4
+		B = SIDE[k]
    
-   t_stage.append([])
-   i=SIDE[k][1]
+		t_stage.append([])
+		i=SIDE[k][1][1]
 
-   i1=SIDE[k][1]
-   j1=SIDE[k][0]
-   c = 0
-   while i<i1+9 :
-     t_stage[k].append([])
-     j=SIDE[k][0]
+		i1=SIDE[k][1][1]
+		j1=SIDE[k][1][0]
+		c = 0
+		while i<i1+9 :
+			t_stage[k].append([])
+			j=SIDE[k][1][0]
 
-     while j<j1+9 :
-       t_stage[k][c].append(STAGE[i][j])
-       j+=1
-       continue
+			while j<j1+9 :
+				t_stage[k][c].append(STAGE[i][j])
+				j+=1
+				continue
 
-     i+=1
-     c+=1
-     continue
+			i+=1
+			c+=1
+			continue
 
-   k+=1
+		k+=1
 
- return t_stage
+	return t_stage
+
+#View Stage for DEBUG
+def viewstage(twostage):
+	for i in range(32):
+		line = ""
+		for j in range(32):
+			line += twostage[i][j]
+		print(line)
 
 #stone & stage reading
 data = getdata() #stage & stone two data
@@ -260,18 +269,23 @@ del data[0]
 onestage = getone(twostage)
 del onedata[0]
 
-#tromming datas
-side=Find_side(twostage)
-tristage = trimming(side,twostage)
-
-#codes
-IF_stage = tristage
-IF_stone = onedata #templary IF = getdata
-act = [[[1,3],0,0],[[4,6],2,0]]
-Main_code = [[1,0,0],[1,1,1]]
-stone_now=onedata[1]
-
+stonelen = len(data)
 #put stone & output
-action = test(IF_stage,IF_stone,Main_code,tristage[0],stone_now)
-putstone(twostage,data[0],[side[0][0]+4,side[0][1]+4],4,act[action])
-print(twostage)
+for n in range(stonelen):
+	#tromming datas
+	side=Find_side(twostage)
+	sidelen = len(side)
+	tristage = trimming(side,twostage)
+
+	#codes
+	IF_stage = tristage
+	IF_stone = onedata #templary IF = getdata
+	act = [[[1,3],0,0],[[4,6],2,0],[7,7],7,7]
+	Main_code = [[1,0,0],[1,1,1]]
+	stone_now=onedata[1]
+
+	random.seed()
+	rnd = random.randint(0,sidelen-1)
+	action = test(IF_stage,IF_stone,Main_code,tristage[0],stone_now)
+	putstone(twostage,data[n],[side[rnd][1][0]+4,side[rnd][1][1]+4],side[rnd][0],act[action])
+	viewstage(twostage)
