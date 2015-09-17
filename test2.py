@@ -6,7 +6,7 @@ def First_search(stage_list):
  Trimming_size=9#トリミングの大きさ(奇数)
  center_xy=int(Trimming_size/2)
  Number_0=Count_0(stage_list)
- Standard_Barrier_Rate=25#後で変更(障害物が多いか少ないかの基準(1〜100%))
+ Standard_Barrier_Rate=6#後で変更(障害物が多いか少ないかの基準(1〜100%))
  stage_len=len(stage_list)
  stage_size=math.sqrt(stage_len)
  Barrier_Rate=(stage_len-Number_0)/float(stage_len)*100
@@ -21,13 +21,13 @@ def First_search(stage_list):
  Trimming_xy=[]
  left=int(math.ceil(stage_size/2)-1)
  right=int(math.floor(stage_size/2))
- center=[[left,left],[right,left],[right,right],[left,right]]
- center_around=[[left-center_xy,left-center_xy],[right+center_xy,left-center_xy],[right+center_xy,right+center_xy],[left-center_xy,right+center_xy]]
+ center=[[left,left],[left,right],[right,right],[right,left]]
+ center_around=[[left-center_xy,left-center_xy],[left-center_xy,right+center_xy],[right+center_xy,right+center_xy],[right+center_xy,left-center_xy]]
  side=[[],[],[],[]]
- side[0]=[[center_xy,center_xy],[left-center_xy,center_xy],[left-center_xy,left-center_xy],[center_xy,left-center_xy]]
- side[1]=[[right+left-center_xy,center_xy],[right+left-center_xy,left-center_xy],[right+center_xy,left-center_xy],[right+center_xy,left-center_xy]]
- side[2]=[[right+left-center_xy,right+left-center_xy],[right+center_xy,right+left-center_xy],[right+center_xy,right+center_xy],[right+left-center_xy,right+center_xy]]
- side[3]=[[center_xy,right+left-center_xy],[center_xy,right+center_xy],[left-center_xy,right+center_xy],[left-center_xy],[right+left-center_xy]]
+ side[0]=[[center_xy,center_xy],[center_xy,left-center_xy],[left-center_xy,left-center_xy],[left-center_xy,center_xy]]
+ side[1]=[[center_xy,right+left-center_xy],[left-center_xy,right+left-center_xy],[left-center_xy,right+center_xy],[center_xy,right+center_xy]]
+ side[2]=[[right+left-center_xy,right+left-center_xy],[right+left-center_xy,right+center_xy],[right+center_xy,right+center_xy],[right+center_xy,right+left-center_xy]]
+ side[3]=[[right+left-center_xy,center_xy],[right+center_xy,center_xy],[right+center_xy,left-center_xy],[right+left-center_xy,left-center_xy]]
  Trimming_yx=[]
  if flag==0:
   i=0
@@ -68,35 +68,35 @@ def First_search_01(stage_list):
   while j<stage_size:
    if cut_stage[i][j]==search_01 and((i<>0 and cut_stage[i-1][j]==Opposite) or (j<>0 and cut_stage[i][j-1]==Opposite) or (i<>(stage_size-1) and cut_stage[i+1][j]==Opposite) or (j<>(stage_size-1) and cut_stage[i][j+1]==Opposite)):
     if search_01==0:
-     Trimming_stage.append([i,j])
+     Trimming_stage.append([j,i])
     if search_01==1:
      if i<>0 and cut_stage[i-1][j]==Opposite:
       for k in Trimming:
        if k==[i-1,j]:
         no=1
       if no==0:
-       Trimming_stage.append(i-1,j)
+       Trimming_stage.append([j,i-1])
       no=0
      if j<>0 and cut_stage[i][j-1]==Opposite:
       for k in Trimming:
        if k==[i,j-1]:
         no=1
       if no==0:
-       Trimming_stage.append(i,j-1)
+       Trimming_stage.append([j-1,i])
       no=0
      if i<>(stage_size-1) and cut_stage[i+1][j]==Opposite:
       for k in Trimming:
        if k==[i+1,j]:
         no=1
       if no==0:
-       Trimming_stage.append(i+1,j)
+       Trimming_stage.append([j,i+1])
       no=0
      if j<>(stage_size-1) and cut_stage[i][j+1]==Opposite:
       for k in Trimming:
        if k==[i,j+1]:
         no=1
       if no==0:
-       Trimming_stage.append(i,j+1)
+       Trimming_stage.append([j+1,i])
       no=0
    j+=1
   i+=1
@@ -127,6 +127,8 @@ def Dist(list1):
   i+=1 
  i=0
  j=0
+ for i in Number_0:
+  print i
  while j<4:
   i=0
   most_number=0
@@ -139,6 +141,7 @@ def Dist(list1):
   most_direct.append(most_number)
   Number_0[most_number]=0
   j+=1
+ print most_direct
  return most_direct
 
 def CUT(list1,cut_size):
@@ -186,7 +189,7 @@ def Count_0(list1):
    Count+=1
  return Count
  
-FilePass='/home/el1414/Desktop/Documents/quest2.txt'
+FilePass='/home/el1414/Desktop/Documents/quest1.txt'
 stage=FileRead_stage(FilePass)
-#print First_search(stage)
-print First_search_01(stage)
+print First_search(stage)
+#print First_search_01(stage)
