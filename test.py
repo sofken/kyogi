@@ -36,7 +36,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
  now_Match_rate=0 #now sone(0-1)
  i=0
  while i<IF_stone_number:
-  now_Match_rate=Match_rate(stone_now,IF_stone[i])
+  now_Match_rate=Match_rate(stone_now,getone(IF_stone[i]))
   if now_Match_rate>Match_rate_stone_max: #rewrite semelar
    Match_rate_stone_number=i
    Match_rate_stone_max=now_Match_rate
@@ -52,6 +52,8 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
  Match_rate_stone_ma = round(Match_rate_stone_max,1)
  Match_rate_stone_ma = round(Match_rate_stage_max,1)
  while i<Main_code_number:
+  #print(Match_rate_stone_number,Match_rate_stage_number)
+  #print(Main_code[i])
   if Main_code[i][0]==Match_rate_stone_number and Main_code[i][1]==Match_rate_stage_number:
    return Main_code[i][2]
   i+=1
@@ -59,7 +61,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
 
 #get stage & stone data 0->stage 1~->stone
 def getdata():
-	f = open('sample2.txt','r')
+	f = open('sample.txt','r')
 	tmpdata = []
 	data = []
 	i = 0
@@ -138,7 +140,7 @@ def putstone(stage,stone,coor,dire,act):
 		#3->2 or 3->1
 		if(passes == 1):
 			change = '2'
-			print(zerox,zeroy,HT[act[2]*90],act[1]*90)
+			print(zerox,zeroy,HT[act[2]],act[1]*90)
 		else:
 			change = '0'
 			print(' ')
@@ -146,6 +148,9 @@ def putstone(stage,stone,coor,dire,act):
 			for l in range(8):
 				if(stage[k+zeroy][l+zerox]=='3'):
 					stage[k+zeroy][l+zerox] = change
+		return passes
+	else:
+		return 0
 
 #roll vector
 def roll(stone,times):
@@ -186,19 +191,15 @@ def findone(stone,x,y):
 			for k in range(i):
 				if(j+y<8 and k+x<8 and stone[j+y][k+x]=='1'):
 					one = [k+x,j+y]
-					#print(one)
 					return one
 				elif(y-j>-1 and x-k>-1 and stone[y-j][x-k] == '1'):
 					one = [x-k,y-j]
-					#print(one)
 					return one
-				if(y-j>-1 and k+x<8 and stone[y-j][k+x]=='1'):
+				elif(y-j>-1 and k+x<8 and stone[y-j][k+x]=='1'):
 					one = [k+x,y-j]
-					#print(one)
 					return one
-				elif(j+y>-1 and x-k>-1 and stone[j+y][x-k] == '1'):
+				elif(j+y<8 and x-k>-1 and stone[j+y][x-k] == '1'):
 					one = [x-k,j+y]
-					#print(one)
 					return one
 
 def Find_side(STAGE):
@@ -250,100 +251,6 @@ def trimming(SIDE,STAGE):
 
 	return t_stage
 
-def First_search(stage_list):
- #import math
- Trimming_xy=[]
- Trimming_size=9
- center_xy=int(Trimming_size/2)
- Number_0=Count_0(stage_list)
- Standard_Barrier_Rate=6
- stage_len=len(stage_list)
- stage_size=math.sqrt(stage_len)
- Barrier_Rate=(stage_len-Number_0)/float(stage_len)*100
- flag=-1#0:Center 1:Corner
- most_0=Dist(stage_list)
- if Barrier_Rate==0:
-  return [[center_xy,center_xy]]
- if(Barrier_Rate>Standard_Barrier_Rate):
-  flag=0
- else:
-  flag=1
- Trimming_xy=[]
- left=int(math.ceil(stage_size/2)-1)
- right=int(math.floor(stage_size/2))
- center=[[left,left],[left,right],[right,right],[right,left]]
- center_around=[[left-center_xy,left-center_xy],[left-center_xy,right+center_xy],[right+center_xy,right+center_xy],[right+center_xy,left-center_xy]]
- side=[[],[],[],[]]
- side[0]=[[center_xy,center_xy],[center_xy,left-center_xy],[left-center_xy,left-center_xy],[left-center_xy,center_xy]]
- side[1]=[[center_xy,right+left-center_xy],[left-center_xy,right+left-center_xy],[left-center_xy,right+center_xy],[center_xy,right+center_xy]]
- side[2]=[[right+left-center_xy,right+left-center_xy],[right+left-center_xy,right+center_xy],[right+center_xy,right+center_xy],[right+center_xy,right+left-center_xy]]
- side[3]=[[right+left-center_xy,center_xy],[right+center_xy,center_xy],[right+center_xy,left-center_xy],[right+left-center_xy,left-center_xy]]
- Trimming_yx=[]
- if flag==0:
-  i=0
-  while i<4:
-   Trimming_yx.append(center[most_0[i]])
-   i+=1
-  i=0
-  while i<4:
-   Trimming_yx.append(center_around[most_0[i]])
-   i+=1
- if flag==1:
-  i=0
-  while i<4:
-   Trimming_yx.extend(side[most_0[i]])
-   i+=1
- return Trimming_yx
-
-def Dist(list1):
- #import math
- stage_size=int(math.sqrt(len(list1)))
- cut_stage=CUT(list1,stage_size)
- center_left=int(math.ceil(stage_size/2)-1)
- center_right=int(math.floor(stage_size/2))
- Number_0=[0,0,0,0]
- most_direct=[]
- i=0
- while i<stage_size:
-  j=0
-  while j<stage_size:
-   if cut_stage[i][j]==0:
-    if i<=center_left and j<=center_left:
-     Number_0[0]+=1
-    if i>=center_right and j<=center_left:
-     Number_0[1]+=1
-    if i>=center_right and j>=center_right:
-     Number_0[2]+=1
-    if i<=center_left and j>=center_right:
-     Number_0[3]+=1
-   j+=1
-  i+=1 
- i=0
- j=0
- while j<4:
-  i=0
-  most_number=0
-  most=Number_0[0]
-  while i<4: 
-   if most<Number_0[i]:
-    most=Number_0[i]
-    most_number=i
-   i+=1
-  most_direct.append(most_number)
-  Number_0[most_number]=0
-  j+=1
- return most_direct
-
-def CUT(list1,cut_size):
- Cut_list=[]
- i=0
- k=cut_size
- while k<=cut_size*cut_size:
-  Cut_list.append(list1[i:k])
-  i+=cut_size
-  k+=cut_size
- return Cut_list
-
 #View Stage for DEBUG
 def viewstage(twostage):
 	for i in range(32):
@@ -351,6 +258,119 @@ def viewstage(twostage):
 		for j in range(32):
 			line += twostage[i][j]
 		print(line)
+
+#search first step
+def putfirst(twostage,data,IF_stage,IF_stone,act,Main_code):
+	twolist = []
+	for i in range(32):
+		for j in range(32):
+			if(twostage[i][j]=='1'):
+				if(twostage[i-1][j] == '0' or twostage[i][j-1] == '0' or twostage[i+1][j] == '0' or twostage[i][j+1] == '0'):
+					twostage[i][j] = '2'
+					twolist.append([i,j])
+	putting(twostage,data,IF_stage,IF_stone,act,Main_code,1)
+	viewstage(twostage)
+	for k in twolist:
+		twostage[k[0]][k[1]] = '1'
+
+
+def IF_STAGE():
+ if_stage=[]
+ k=0
+ while k<100 :  #2個つくる
+   i=0
+   if_stage.insert(k,[[],[],[],[],[],[],[],[],[]]) #リストの用意
+
+   while i<9 :
+     j=0
+     while j<9 :
+      #乱数で値を入れる
+       if_stage[k][i].append(str(random.randint(0,1)))
+       j+=1
+       continue
+
+     i+=1
+     continue
+
+   k+=1
+
+ return if_stage
+def IF_STONE():
+ if_stone=[]
+ k=0
+ while k<100 :  
+   i=0
+   if_stone.insert(k,[[],[],[],[],[],[],[],[]]) 
+
+   while i<8 :
+     j=0
+     while j<8 :
+      
+       if_stone[k][i].append(str(random.randint(0,1)))
+       j+=1
+       continue
+
+     i+=1
+     continue
+
+   k+=1
+
+ return if_stone
+def actcode() :
+ act=[]
+ i=0
+ while i<1000 :
+
+   act.append([[random.randint(0,7),random.randint(0,7)],random.randint(0,3),random.randint(0,1)])
+
+   i+=1
+
+ return act
+
+def maincode() :
+ main=[]
+ i=0
+ a = []
+ b = []
+ while i<9000 :
+   passes = 0
+   arnd = random.randint(0,99)
+   brnd = random.randint(0,99)
+   while(i!=0 and passes==0):
+	   arnd = random.randint(0,99)
+	   brnd = random.randint(0,99)
+	   for j in range(len(a)):
+		   if(a[j]==arnd and b[j]==brnd):
+			   passes = 0
+			   break
+		   else:
+			   passes = 1
+   
+   a.append(arnd)
+   b.append(brnd)
+   main.append([arnd,brnd,random.randint(0,999)])
+
+   i+=1
+
+ return main
+
+def putting(twostage,data,IF_stage,IF_stone,act,Main_code,n):
+	side=Find_side(twostage)
+	sidelen = len(side)
+	tristage = trimming(side,twostage)
+	res = 0 #0...loop
+	times = 0
+	while(res==0 and times<10):
+		random.seed()
+		rnd = random.randint(0,sidelen-1)
+		action = test(IF_stage,IF_stone,Main_code,tristage[rnd],getone(data[n]))
+		res = putstone(twostage,data[n],[side[rnd][1][0]+4,side[rnd][1][1]+4],side[rnd][0],act[action])
+		times += 1
+	
+
+
+
+
 
 #stone & stage reading
 #data     = two stone
@@ -362,30 +382,26 @@ onedata = []
 for i in range(len(data)):
 	onedata.append(getone(data[i])) #stage & stone one data
 twostage = data[0]
+
 addone(twostage)
 del data[0]
 onestage = getone(twostage)
 del onedata[0]
 
+#codes
+IF_stage = IF_STAGE()
+IF_stone = IF_STONE()
+act = actcode()
+act.append([[7,7],7,7])
+Main_code = maincode()
+
+#first
+putfirst(twostage,data,IF_stage,IF_stone,act,Main_code)
+
 #put stone & output
 stonelen = len(data)
-firstcoor = First_search(onestage)
-print(firstcoor)
-for n in range(stonelen):
+
+for n in range(stonelen-1):
 	#tromming datas
-	side=Find_side(twostage)
-	sidelen = len(side)
-	tristage = trimming(side,twostage)
-
-	#codes
-	IF_stage = tristage
-	IF_stone = onedata #templary IF = getdata
-	act = [[[1,3],0,0],[[4,6],2,0],[7,7],7,7]
-	Main_code = [[1,0,0],[1,1,1]]
-	stone_now=onedata[1]
-
-	random.seed()
-	rnd = random.randint(0,sidelen-1)
-	action = test(IF_stage,IF_stone,Main_code,tristage[0],stone_now)
-	putstone(twostage,data[n],[side[rnd][1][0]+4,side[rnd][1][1]+4],side[rnd][0],act[action])
-	#viewstage(twostage)
+	putting(twostage,data,IF_stage,IF_stone,act,Main_code,n+1)
+	viewstage(twostage)
