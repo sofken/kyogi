@@ -1,6 +1,7 @@
 import math
 from copy import deepcopy
 import random
+import timeit
 
 def Match_rate(list1,list2):
  #import math
@@ -97,8 +98,9 @@ def Count_0(list1):
  Count=0
  i=0
  for i in list1:
-  if i==0:
-   Count+=1
+  for j in i:
+   if j=='0':
+    Count+=1
  return Count
 
 #put stone
@@ -260,18 +262,20 @@ def viewstage(twostage):
 		print(line)
 
 #search first step
-def putfirst(twostage,data,IF_stage,IF_stone,act,Main_code):
+def putfirst(stage,data,IF_stage,IF_stone,act,Main_code,n):
 	twolist = []
 	for i in range(32):
 		for j in range(32):
-			if(twostage[i][j]=='1'):
-				if(twostage[i-1][j] == '0' or twostage[i][j-1] == '0' or twostage[i+1][j] == '0' or twostage[i][j+1] == '0'):
-					twostage[i][j] = '2'
+			if(stage[i][j]=='1'):
+				if(stage[i-1][j] == '0' or stage[i][j-1] == '0' or stage[i+1][j] == '0' or stage[i][j+1] == '0'):
+					stage[i][j] = '2'
 					twolist.append([i,j])
-	putting(twostage,data,IF_stage,IF_stone,act,Main_code,1)
-	viewstage(twostage)
-	for k in twolist:
-		twostage[k[0]][k[1]] = '1'
+	res = putting(stage,data,IF_stage,IF_stone,act,Main_code,n)
+	#viewstage(twostage)
+	if(res!=0):
+		for k in twolist:
+			stage[k[0]][k[1]] = '1'
+	return res
 
 
 def IF_STAGE():
@@ -328,6 +332,7 @@ def actcode() :
  return act
 
 def maincode() :
+ print('start create maincode ...')
  main=[]
  i=0
  a = []
@@ -351,22 +356,124 @@ def maincode() :
    main.append([arnd,brnd,random.randint(0,999)])
 
    i+=1
-
+ print('finish create maincode')
  return main
 
-def putting(twostage,data,IF_stage,IF_stone,act,Main_code,n):
-	side=Find_side(twostage)
+def putting(stage,data,IF_stage,IF_stone,act,Main_code,n):
+	side=Find_side(stage)
 	sidelen = len(side)
-	tristage = trimming(side,twostage)
+	tristage = trimming(side,stage)
 	res = 0 #0...loop
 	times = 0
-	while(res==0 and times<10):
+	while(res==0 and times<2):
 		random.seed()
 		rnd = random.randint(0,sidelen-1)
 		action = test(IF_stage,IF_stone,Main_code,tristage[rnd],getone(data[n]))
-		res = putstone(twostage,data[n],[side[rnd][1][0]+4,side[rnd][1][1]+4],side[rnd][0],act[action])
+		res = putstone(stage,data[n],[side[rnd][1][0]+4,side[rnd][1][1]+4],side[rnd][0],act[action])
 		times += 1
+	return res
+
+
+
+#Genetic algorithm	
+#contents
+LEN_N = 9000 #Main code len
+LEN_B = 18000 #After born Main code len
+TARGET = 11
+DEATH = 4 #not death percentage
+PER = 5 #not mutation percentage
+
+#radian -> x
+def work(stage,data,IF_stage,IF_stone,act,Main_code):
+	#first
+	i = 0
+	res = 0
+	while(res==0):
+		res = putfirst(stage,data,IF_stage,IF_stone,act,Main_code,i)
+		i += 1
+
+	#put stone & output
+	stonelen = len(data)
+
+	#for n in range(stonelen-i):
+	for n in [i]:
+		#tromming datas
+		putting(stage,data,IF_stage,IF_stone,act,Main_code,n+i)
+		#viewstage(twostage)
 	
+	return Count_0(stage)
+	#viewstage(twostage)
+	#random in 0-180
+
+#check stop revoluation
+def check_stop(lista,ranktable):
+	stop = 1
+	j = 0
+	for i in lista:
+		zero = work()
+		ranktable.append([j,zero])
+		if zero <= TARGET: #warning
+			stop = 0
+		j += 1
+	return stop
+
+#Crossing
+def crossing(lista):
+	for i in range((LEN_B-LEN_N)/2):
+		one = 0
+		two = 0
+		while one == two:
+			one = random.randint(0,LEN_N-1)
+			two = random.randint(0,LEN_N-1)
+		tmp1 = deepcopy(lista[one])
+		tmp2 = deepcopy(lista[two])
+		for j in range(1000):
+			rnd = random.randint(0,8996)
+			tmp1[rnd],tmp2[rnd] = tmp2[rnd],tmp1[rnd]
+			tmp1[rnd+1],tmp2[rnd+1] = tmp2[rnd+1],tmp1[rnd+1]
+			tmp1[rnd+2],tmp2[rnd+2] = tmp2[rnd+2],tmp1[rnd+2]
+		lista.append(tmp1)
+		lista.append(tmp2)
+	return lista
+
+#sort(aliving)
+def sortalive(ranktable):
+	ranktable.sort(key=lambda rank: rank[1])
+
+#death in roulette
+def roulette(lista):
+	i = LEN_B - LEN_N
+	j = 0
+	while i>0:
+		rnd = random.randint(0,100)
+		if(rnd < j*DEATH):
+			del lista[ranktable[j][0]]
+			i -= 1
+		if(j < LEN_B-1):
+			j += 1
+		else:
+			j = 0
+	return lista
+
+#output excellence
+def excell(lista):
+	maximam = 0
+	maximam_ind = 0
+	for i in range(LEN_N):
+		now = work(lista[i][0],degtorad(lista[i][1]),lista[i][2])
+		if(now > maximam):
+			maximam = now
+			maximam_ind = i
+	print(maximam)
+#	print(maximam_ind)
+
+#mutation
+def mutation(lista):
+	for i in range(LEN_B):
+		rnd = random.randint(0,100)
+		if(rnd > PER):
+			lista[i] = [random.randint(MINN1,MAXN1),random.randint(MINN2,MAXN2),random.randint(MINN3,MAXN3)]
+	return lista
 
 
 
@@ -395,13 +502,11 @@ act = actcode()
 act.append([[7,7],7,7])
 Main_code = maincode()
 
-#first
-putfirst(twostage,data,IF_stage,IF_stone,act,Main_code)
-
-#put stone & output
-stonelen = len(data)
-
-for n in range(stonelen-1):
-	#tromming datas
-	putting(twostage,data,IF_stage,IF_stone,act,Main_code,n+1)
-	viewstage(twostage)
+cpstage = deepcopy(twostage)
+work(cpstage,data,IF_stage,IF_stone,act,Main_code)
+#while check_stop(Main_code):
+#	Main_code = crossing(Main_code)
+#	Main_code= sortalive(Main_code)
+#	Main_code= mutation(Main_code)
+#	Main_code = roulette(Main_code)
+#	#excell(Main_code)
