@@ -1,7 +1,7 @@
 import math
 from copy import deepcopy
 import random
-import timeit
+import numpy as np
 
 def Match_rate(list1,list2):
  #import math
@@ -10,14 +10,20 @@ def Match_rate(list1,list2):
  if list1_len<>list2_len:
   return -1
  i=0
- list1_size=0
- list2_size=0
- inner=0
- while i<list1_len :
-  list1_size+=int(list1[i])*int(list1[i])
-  list2_size+=int(list2[i])*int(list2[i])
-  inner+=int(list1[i])*int(list2[i])
-  i+=1
+ #list1_size=0
+ #list2_size=0
+ nplist1 = np.array([list1],np.float)
+ nplist2 = np.array([list2],np.float)
+ nplist12 = np.array(list1,np.float)
+ nplist22 = np.array(list2,np.float)
+ list1_size = np.linalg.norm(nplist1)
+ list2_size = np.linalg.norm(nplist2)
+ inner=np.dot(nplist12,nplist22)
+ #while i<list1_len :
+  #list1_size+=int(list1[i])*int(list1[i])
+  #list2_size+=int(list2[i])*int(list2[i])
+  #i[nner+=int(list1[i])*int(list2[i])
+  #i+=1
  return inner/(math.sqrt(list1_size)*math.sqrt(list2_size))
  
 #IF_stage=[[first],[second],,,]]
