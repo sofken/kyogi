@@ -1,6 +1,7 @@
 import math
 from copy import deepcopy
 import random
+import numpy as np
 from numba import double
 from numba.decorators import jit
 
@@ -12,14 +13,21 @@ def Match_rate(list1,list2):
  if list1_len<>list2_len:
   return -1
  i=0
- list1_size=0
- list2_size=0
+ #list1_size=0
+ #list2_size=0
  inner=0
- while i<list1_len :
-  list1_size+=int(list1[i])*int(list1[i])
-  list2_size+=int(list2[i])*int(list2[i])
-  inner+=int(list1[i])*int(list2[i])
-  i+=1
+ #while i<list1_len :
+ nplist1 = np.array([list1],np.float)
+ nplist2 = np.array([list2],np.float)
+ nplist12 = np.array(list1,np.float)
+ nplist22 = np.array(list2,np.float)
+ list1_size = np.linalg.norm(nplist1)
+ list2_size = np.linalg.norm(nplist2)
+ inner=np.dot(nplist12,nplist22)
+  #list1_size+=int(list1[i])*int(list1[i])
+  #list2_size+=int(list2[i])*int(list2[i])
+  #inner+=int(list1[i])*int(list2[i])
+  #i+=1
  return inner/(math.sqrt(list1_size)*math.sqrt(list2_size))
 
 #IF_stage=[[first],[second],,,]]
@@ -43,7 +51,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
  now_Match_rate=0 #now sone(0-1)
  i=0
  while i<IF_stone_number:
-  now_Match_rate=Match_rate(stone_now,getone(IF_stone[i]))
+  now_Match_rate=Match_rate(stone_now,(IF_stone[i]))
   if now_Match_rate>Match_rate_stone_max: #rewrite semelar
    Match_rate_stone_number=i
    Match_rate_stone_max=now_Match_rate
@@ -52,7 +60,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
   i+=1
  i=0
  while i<IF_stage_number:
-  now_Match_rate=Match_rate(getone(Trimming_stage),getone(IF_stage[i]))
+  now_Match_rate=Match_rate(Trimming_stage,IF_stage[i])
   if now_Match_rate>Match_rate_stage_max:
    Match_rate_stage_number=i
    Match_rate_stage_max=now_Match_rate
@@ -259,16 +267,14 @@ def trimming(SIDE,STAGE):
 		j1=SIDE[k][1][0]
 		c = 0
 		while i<i1+9 :
-			t_stage[k].append([])
 			j=SIDE[k][1][0]
 
 			while j<j1+9 :
-				t_stage[k][c].append(STAGE[i][j])
+				t_stage[k].append(STAGE[i][j])
 				j+=1
 				continue
 
 			i+=1
-			c+=1
 			continue
 
 		k+=1
@@ -306,19 +312,15 @@ def IF_STAGE():
  if_stage=[]
  k=0
  while k<100 :  #2個つくる
-   i=0
-   if_stage.insert(k,[[],[],[],[],[],[],[],[],[]]) #リストの用意
-
-   while i<9 :
-     j=0
-     while j<9 :
-      #乱数で値を入れる
-       if_stage[k][i].append(str(random.randint(0,1)))
-       j+=1
-       continue
-
-     i+=1
+   j=0
+   tmp = []
+   while j<9*9 :
+    #乱数で値を入れる
+     tmp.extend(str(random.randint(0,1)))
+     j+=1
      continue
+
+   if_stage.append(tmp)
 
    k+=1
 
@@ -329,20 +331,13 @@ def IF_STONE():
  if_stone=[]
  k=0
  while k<100 :  
-   i=0
-   if_stone.insert(k,[[],[],[],[],[],[],[],[]]) 
-
-   while i<8 :
-     j=0
-     while j<8 :
-      
-       if_stone[k][i].append(str(random.randint(0,1)))
-       j+=1
-       continue
-
-     i+=1
+   j=0
+   tmp = []
+   while j<8*8 :
+     tmp.extend(str(random.randint(0,1)))
+     j+=1
      continue
-
+   if_stone.append(tmp)
    k+=1
 
  return if_stone
@@ -396,7 +391,7 @@ def putting(stage,data,IF_stage,IF_stone,act,Main_code,n):
 	while(res==0 and times<2):
 		random.seed()
 		rnd = random.randint(0,sidelen-1)
-		action = test(IF_stage,IF_stone,Main_code,tristage[rnd],getone(data[n]))
+		action = test(IF_stage,IF_stone,Main_code,tristage[rnd],onedata[n])
 		res = putstone(stage,data[n],[side[rnd][1][0]+4,side[rnd][1][1]+4],side[rnd][0],act[action])
 		times += 1
 	return res
@@ -558,7 +553,7 @@ twostage = data[0]
 addone(twostage)
 
 del data[0]
-onestage = getone(twostage)
+onestage = onedata[0]
 del onedata[0]
 
 #codes
