@@ -1,7 +1,10 @@
 import math
 from copy import deepcopy
 import random
+from numba import double
+from numba.decorators import jit
 
+#@jit
 def Match_rate(list1,list2):
  #import math
  list1_len=len(list1)
@@ -27,6 +30,7 @@ def Match_rate(list1,list2):
 
 Match_break = 0.8
 
+#@jit
 def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
  IF_stage_number=len(IF_stage)
  IF_stone_number=len(IF_stone)
@@ -67,6 +71,7 @@ def test(IF_stage,IF_stone,Main_code,Trimming_stage,stone_now):
  return -1
 
 #get stage & stone data 0->stage 1~->stone
+#@jit
 def getdata():
 	f = open('sample.txt','r')
 	tmpdata = []
@@ -74,15 +79,16 @@ def getdata():
 	i = 0
 	
 	for line in f:
-		if(len(line)==1):
+		if(len(line)==2):
 			data.append(tmpdata)
 			tmpdata = []
-		elif(len(line)!=3):
+		elif(len(line)!=4):
 			line = line.rstrip('\r\n')
 			tmpdata.append(list(line))
 	return data	
 
 #two data -> one data
+#@jit
 def getone(two):
 	twolen = len(two)
 	cptwo = deepcopy(two)
@@ -90,6 +96,7 @@ def getone(two):
 		cptwo[0].extend(cptwo[i+1])
 	return cptwo[0]
 
+#@jit
 def Conversion(list1):
  i=0
  list2=[]
@@ -100,6 +107,7 @@ def Conversion(list1):
    list2.append(i)
  return list2
 
+#@jit
 def Count_0(list1):
  Count=0
  i=0
@@ -110,6 +118,7 @@ def Count_0(list1):
  return Count
 
 #put stone
+#@jit
 def putstone(stage,stone,coor,dire,act):
 	#coor(coordinate)...(X,Y)
 	#dire(direction)...1(up) 2(bottom) 3(left) 4(right)
@@ -148,20 +157,21 @@ def putstone(stage,stone,coor,dire,act):
 		#3->2 or 3->1
 		if(passes == 1):
 			change = '2'
-			#print(zerox,zeroy,HT[act[2]],act[1]*90)
+			print(zerox,zeroy,HT[act[2]],act[1]*90)
 		else:
 			change = '0'
-			#print(' ')
+			print(' ')
 		for k in range(8):
 			for l in range(8):
 				if(stage[k+zeroy][l+zerox]=='3'):
 					stage[k+zeroy][l+zerox] = change
 		return passes
 	else:
-		#print(' ')
+		print(' ')
 		return 0
 
 #roll vector
+#@jit
 def roll(stone,times):
 	rollstone = deepcopy(stone)
 	copystone = deepcopy(stone)
@@ -175,6 +185,7 @@ def roll(stone,times):
 	return copystone
 
 #change left and right
+#@jit
 def lrchange(stone):
 	changestone = deepcopy(stone)
 	for i in range(8):
@@ -184,6 +195,7 @@ def lrchange(stone):
 	return changestone
 
 #add many 1
+#@jit
 def addone(stage):
 	for i in range(32):
 		for j in range(10):
@@ -194,6 +206,7 @@ def addone(stage):
 			stage[k+32].append('1')
 
 #find 1 in stone
+#@jit
 def findone(stone,x,y):
 	for i in range(8):
 		for j in range(i+1):
@@ -211,6 +224,7 @@ def findone(stone,x,y):
 					one = [x-k,j+y]
 					return one
 
+#@jit
 def Find_side(STAGE):
 	n=32
 	i=0
@@ -228,6 +242,7 @@ def Find_side(STAGE):
 					Side.append([4,[j,i]])
 	return Side
 
+#@jit
 def trimming(SIDE,STAGE):
 	a=len(SIDE)
 	k=0
@@ -261,6 +276,7 @@ def trimming(SIDE,STAGE):
 	return t_stage
 
 #View Stage for DEBUG
+#@jit
 def viewstage(twostage):
 	for i in range(32):
 		line = ""
@@ -269,6 +285,7 @@ def viewstage(twostage):
 		print(line)
 
 #search first step
+#@jit
 def putfirst(stage,data,IF_stage,IF_stone,act,Main_code,n):
 	twolist = []
 	for i in range(32):
@@ -284,6 +301,7 @@ def putfirst(stage,data,IF_stage,IF_stone,act,Main_code,n):
 	return res
 
 
+#@jit
 def IF_STAGE():
  if_stage=[]
  k=0
@@ -305,6 +323,8 @@ def IF_STAGE():
    k+=1
 
  return if_stage
+
+#@jit
 def IF_STONE():
  if_stone=[]
  k=0
@@ -326,6 +346,8 @@ def IF_STONE():
    k+=1
 
  return if_stone
+
+#@jit
 def actcode() :
  act=[]
  i=0
@@ -337,6 +359,7 @@ def actcode() :
 
  return act
 
+#@jit
 def maincode() :
  main=[]
  i=0
@@ -363,6 +386,7 @@ def maincode() :
    i+=1
  return main
 
+#@jit
 def putting(stage,data,IF_stage,IF_stone,act,Main_code,n):
 	side=Find_side(stage)
 	sidelen = len(side)
@@ -377,6 +401,7 @@ def putting(stage,data,IF_stage,IF_stone,act,Main_code,n):
 		times += 1
 	return res
 
+#@jit
 def allclear(lista):
 	length = len(lista)
 	for i in range(length):
@@ -386,11 +411,12 @@ def allclear(lista):
 #contents
 LEN_N = 22 #Main code len
 LEN_B = 30 #After born Main code len
-TARGET = LEN_B/100
+TARGET = 200
 DEATH = 100 #not death percentage
 PER = 1 #not mutation percentage
 
 #radian -> x
+#@jit
 def work(stage,data,IF_stage,IF_stone,act,Main_code):
 	#first
 	i = 0
@@ -414,11 +440,12 @@ def work(stage,data,IF_stage,IF_stone,act,Main_code):
 	#random in 0-180
 
 #check stop revoluation
+#@jit
 def check_stop(lista,ranktable,cpstage,data,IF_stage,IF_stone,act):
 	go = 1
 	j = 0
 	for i in lista:
-		print(i)
+		print(j)
 		cpstage = deepcopy(twostage)
 		zero = work(cpstage,data,IF_stage,IF_stone,act,i)
 		ranktable.append([j,zero])
@@ -428,6 +455,7 @@ def check_stop(lista,ranktable,cpstage,data,IF_stage,IF_stone,act):
 	return go
 
 #Crossing
+#@jit
 def crossing(lista):
 	for i in range((LEN_B-LEN_N)/2):
 		one = 0
@@ -452,11 +480,13 @@ def crossing(lista):
 		lista.append(tmp2)
 
 #sort(aliving)
+#@jit
 def sortalive(ranktable):
 	ranktable.sort(key=lambda rank: rank[1])
 	print(ranktable)
 
 #death in roulette
+#@jit
 def roulette(lista,ranktable):
 	i = LEN_N
 	j = 0
@@ -480,6 +510,7 @@ def roulette(lista,ranktable):
 	print(ranktable)
 	allclear(ranktable)
 
+#@jit
 def checkdel(target,listb):
 	for i in listb:
 		if(i==target):
@@ -488,6 +519,7 @@ def checkdel(target,listb):
 			return 1
 
 #output excellence
+#@jit
 def excell(lista):
 	maximam = 0
 	maximam_ind = 0
@@ -500,6 +532,7 @@ def excell(lista):
 #	print(maximam_ind)
 
 #mutation
+#@jit
 def mutation(lista):
 	for i in range(LEN_B):
 		rnd = random.randint(0,100)
@@ -517,7 +550,6 @@ def mutation(lista):
 #twostage = two stage
 #onestage = one stage
 data = getdata() #stage & stone two data
-print(data)
 onedata = []
 for i in range(len(data)):
 	onedata.append(getone(data[i])) #stage & stone one data
